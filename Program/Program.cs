@@ -179,7 +179,7 @@ namespace GuildTest
 
         }
 
-        public static string EquipmentFile = "equipment.txt";
+        public static string EquipmentFile = @"..\..\..\Program\equipment.txt";
         public static Dictionary<uint, Item> ItemDictionary = new Dictionary<uint, Item>();
 
         public static int Main()
