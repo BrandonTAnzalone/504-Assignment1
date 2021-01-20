@@ -178,15 +178,113 @@ namespace GuildTest
             }
 
         }
+        public class Player : IComparable
+        {
+            // Private attributes
+            private uint id;
+            private string name;
+            private Race race;
+            private uint level;
+            //private uint exp;
+            private uint guildId;
+            //private uint[] gear;
+            //private List<uint> inventory;
 
+            public uint Id
+            {
+                get { return id; }
+                private set { id = value; }
+            }
+
+            public string Name
+            {
+                get { return name; }
+                private set { name = value; }
+            }
+
+            public Race Race
+            {
+                get { return race; }
+                private set { race = value; }
+            }
+
+            public uint Level
+            {
+                get { return level; }
+                set
+                {
+                    if (value >= 0 || value <= MAX_LEVEL)
+                        level = value;
+                    else
+                    {
+                        Console.WriteLine(value + " is not a valid level");
+                    }
+                }
+            }
+
+
+
+
+
+            public uint GuildId
+            {
+                get { return guildId; }
+                set { guildId = value; }
+            }
+
+
+
+
+            // Default Constructor
+            public Player()
+            {
+                Id = 0;
+                Name = "";
+                Race = 0;
+                Level = 0;
+                GuildId = 0;
+            }
+
+            // Constructor
+            public Player(uint iId, string iName, Race iRace, uint iLevel, uint iPrimary)
+            {
+                Id = iId;
+                Name = iName;
+                Race = iRace;
+                Level = iLevel;
+                GuildId = iPrimary;
+            }
+
+
+
+
+            public int CompareTo(object alpha)
+            {
+                //Check for null values
+                if (alpha == null) return 1;
+
+                //typecast
+                Player rightOp = alpha as Player;
+
+                //Players are compared by name
+                if (rightOp != null)
+                    return Name.CompareTo(rightOp.Name);
+                else
+                    throw new ArgumentException("Item CompareTo argument is not an item");
+            }
+
+        }
         public static string EquipmentFile = @"..\..\..\Program\equipment.txt";
+        public static string GuildFile = @"..\..\..\Program\guilds.txt";
+        public static string PlayerFile = @"..\..\..\Program\players.txt";
         public static Dictionary<uint, Item> ItemDictionary = new Dictionary<uint, Item>();
-
+        public static Dictionary<uint, Player> PlayerDictionary = new Dictionary<uint, Player>();
         public static int Main()
         {
             // Title
             Console.WriteLine("Welcome to the World of ConflictCraft: Testing Environment!\n");
             ReadItems(EquipmentFile);
+            //ReadPlayers();
 
             string s = "";
 
@@ -252,7 +350,6 @@ namespace GuildTest
                 Console.WriteLine(input + "file does not exist");
             }
         }
-
         // Print items
         public static void ListItems()
         {
