@@ -358,7 +358,7 @@ namespace GuildTest
                         ListPlayers();
                         break;
                     case "2":
-                        //ListGuilds();
+                        ListGuilds();
                         break;
                     case "3":
                         ListItems();
@@ -367,7 +367,7 @@ namespace GuildTest
                         // Print Gear List For Player Method
                         break;
                     case "5":
-                        // Leave Guild Method
+                        LeaveGuild();
                         break;
                     case "6":
                         // Join Guild Method
@@ -521,6 +521,30 @@ namespace GuildTest
             catch (FileNotFoundException)
             {
                 Console.WriteLine(input + "file does not exist");
+            }
+        }
+
+        public static void ListGuilds()
+        {
+            foreach (KeyValuePair<uint, string> pair in GuildDictionary)
+            {
+                Console.WriteLine("{0}", pair.Value);
+            }
+        }
+
+        public static void LeaveGuild()
+        {
+            Console.Write("Enter the player name: ");
+            string playerName =  Console.ReadLine();
+
+            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+            {
+                if (pair.Value.Name.Equals(playerName)) 
+                {
+                    pair.Value.GuildID = 0;
+                    Console.WriteLine("{0} has left thier Guild.", playerName);
+                    break;
+                }
             }
         }
     }
