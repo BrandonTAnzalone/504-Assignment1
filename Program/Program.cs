@@ -370,7 +370,7 @@ namespace GuildTest
                         LeaveGuild();
                         break;
                     case "6":
-                        // Join Guild Method
+                        JoinGuild();
                         break;
                     case "7":
                         // Equip Gear Method
@@ -544,6 +544,32 @@ namespace GuildTest
                     pair.Value.GuildID = 0;
                     Console.WriteLine("{0} has left thier Guild.", playerName);
                     break;
+                }
+            }
+        }
+
+        public static void JoinGuild()
+        {
+            Console.Write("Enter the player name: ");
+            string playerName = Console.ReadLine();
+
+            Console.Write("Enter the Guild they will join: ");
+            string guildName = Console.ReadLine();
+
+
+            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+            {
+                if (pair.Value.Name.Equals(playerName))
+                {
+                    foreach (KeyValuePair<uint, string> pair2 in GuildDictionary)
+                    {
+                        if(pair2.Value.Equals(guildName))
+                        {
+                            pair.Value.GuildID = pair2.Key;
+                            Console.WriteLine("{0} has joined {1}!", playerName, guildName);
+                            break;
+                        }
+                    }
                 }
             }
         }
