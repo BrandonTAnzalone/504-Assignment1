@@ -1,4 +1,14 @@
-﻿using System;
+﻿//***************************************************************************
+//
+//  Troy DeClerck       - Z1877438
+//  Brandon Anzalone    - Z-------
+//  CSCI 473/504
+//
+//  We certify that this is our own work and where appropriate an extension
+//  of the starter code provided for the assignment
+//***************************************************************************
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +17,7 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GuildTest
+namespace Assignment1
 {
     public static class Program
     {
