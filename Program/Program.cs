@@ -30,6 +30,7 @@ namespace Assignment1
         public static uint MAX_STAMINA = 275;
         #endregion
 
+        // The Specific item types
         public enum ItemType
         {
             Helmet, Neck, Shoulders, Back, Chest,
@@ -37,6 +38,7 @@ namespace Assignment1
             Ring, Trinket
         };
 
+        // Each unique race
         public enum Race { Orc, Troll, Tauren, Forsaken };
 
         public class Item : IComparable
@@ -51,18 +53,22 @@ namespace Assignment1
             private uint requirement;
             private string flavor;
 
+            // Read Only Access
             public uint Id
             {
                 get { return id; }
                 private set { id = value; }
             }
 
+            // Read/Write Access
             public string Name
             {
                 get { return name; }
                 set { name = value; }
             }
 
+            // Read/Write Access
+            // Must EXCLUDE 0 and 12
             public ItemType Type
             {
                 get { return type; }
@@ -77,6 +83,8 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
+            // Must be between 0 and max level
             public uint Ilvl
             {
                 get { return ilvl; }
@@ -91,6 +99,8 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
+            // Must be between 0 and max primary
             public uint Primary
             {
                 get { return primary; }
@@ -105,6 +115,8 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
+            // Must be between 0 and max stamina
             public uint Stamina
             {
                 get { return stamina; }
@@ -119,6 +131,8 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
+            // Must be between 0 and max level
             public uint Requirement
             {
                 get { return requirement; }
@@ -133,6 +147,7 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
             public string Flavor
             {
                 get { return flavor; }
@@ -190,6 +205,7 @@ namespace Assignment1
             }
 
         }
+
         public class Player : IComparable
         {
             // Private attributes
@@ -202,18 +218,22 @@ namespace Assignment1
             private uint[] gear;
             private List<uint> inventory;
 
+            // Read Only Access
             public uint Id
             {
                 get { return id; }
                 private set { id = value; }
             }
 
+            // Read Only Access
             public string Name
             {
                 get { return name; }
                 private set { name = value; }
             }
 
+            // Read Only Access
+            // Must be between 0 and 3
             public Race PlayerRace
             {
                 get { return playerRace; }
@@ -230,6 +250,7 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
             public uint Level
             {
                 get { return level; }
@@ -244,6 +265,7 @@ namespace Assignment1
                 }
             }
 
+            // Read Access, Write Access Increases Current Level
             public uint Exp
             {
                 get { return exp; }
@@ -253,6 +275,7 @@ namespace Assignment1
                 }
             }
 
+            // Read/Write Access
             public uint GuildID
             {
                 get { return guildID; }
@@ -266,7 +289,15 @@ namespace Assignment1
                 set { gear[index] = value; }
             }
 
-            // Each player's gear
+            /**
+             * Print out the gear for a specified player.
+             * 
+             * Take the player's name from the user's input and print any matching
+             * gear from the item's dictionary.
+             * 
+             * @note If a match is not found, set a variable to the current iteration
+             *       and print an 'Empty' message.
+             ****************************************************************************/
             public void PrintGearList()
             {
                 Console.Write("\n");
@@ -381,6 +412,8 @@ namespace Assignment1
         {
             // Title
             Console.WriteLine("Welcome to the World of ConflictCraft: Testing Environment!\n");
+            
+            // Call functions to read each file
             ReadItems(EquipmentFile);
             ReadPlayers(PlayerFile);
             ReadGuilds(GuildFile);
@@ -389,6 +422,7 @@ namespace Assignment1
 
             do
             {
+                // Menu
                 Console.WriteLine("\nWelcome to World of ConflictCraft: Testing Environment. Please select an option from the list below:");
                 Console.WriteLine("\t1.) Print All Players");
                 Console.WriteLine("\t2.) Print All Guilds");
@@ -454,7 +488,14 @@ namespace Assignment1
             return 0;
         }
 
-        // Read items
+        /**
+         * Reads the equipment file and stores them into a dictionary.
+         * 
+         * Converts each input separated by tabs into a new Item and adds them to 
+         * a previously defined item dictionary.
+         * 
+         * @param input - The name of the input file to be read.
+         ****************************************************************************/
         public static void ReadItems(string input)
         {
             // String to read lines
@@ -491,7 +532,13 @@ namespace Assignment1
                 Console.WriteLine(input + "file does not exist");
             }
         }
-        // Print items
+
+        /**
+         * Lists all items in the item dictionary.
+         * 
+         * Uses a foreach loop to cycle through the items and prints each 
+         * of their values.
+         ****************************************************************************/
         public static void ListItems()
         {
             foreach (KeyValuePair<uint, Item> pair in ItemDictionary)
@@ -500,7 +547,14 @@ namespace Assignment1
             }
         }
 
-        // Read Players
+        /**
+         * Reads the Player file and stores them into a dictionary.
+         * 
+         * Converts each input separated by tabs into a new Player and adds them to 
+         * a previously defined player dictionary.
+         * 
+         * @param input - The name of the input file to be read.
+         ****************************************************************************/
         public static void ReadPlayers(string input)
         {
             // String to read lines into
@@ -541,7 +595,12 @@ namespace Assignment1
             }
         }
 
-        // Print Players
+        /**
+         * Lists all players in the player dictionary.
+         * 
+         * Uses a foreach loop to cycle through the players and prints each 
+         * of their values.
+         ****************************************************************************/
         public static void ListPlayers()
         {
             foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
@@ -550,7 +609,14 @@ namespace Assignment1
             }
         }
 
-        // Read Guilds
+        /**
+         * Reads the Guild file and stores them into a dictionary.
+         * 
+         * Converts each input separated by tabs and adds them to 
+         * a previously defined guild dictionary.
+         * 
+         * @param input - The name of the input file to be read.
+         ****************************************************************************/
         public static void ReadGuilds(string input)
         {
             // String to read lines into
@@ -585,6 +651,12 @@ namespace Assignment1
             }
         }
 
+        /**
+         * Lists all guilds in the guild dictionary.
+         * 
+         * Uses a foreach loop to cycle through the guilds and prints each 
+         * of their values.
+          ****************************************************************************/
         public static void ListGuilds()
         {
             foreach (KeyValuePair<uint, string> pair in GuildDictionary)
@@ -593,6 +665,12 @@ namespace Assignment1
             }
         }
 
+        /**
+         * The user enters a player's name and the player leaves their guild
+         * 
+         * Uses a foreach loop to cycle through the player dictionary in order
+         * to find a matching player with the input provided.
+         ****************************************************************************/
         public static void LeaveGuild()
         {
             Console.Write("Enter the player name: ");
@@ -609,6 +687,14 @@ namespace Assignment1
             }
         }
 
+        /**
+         * The user enters a player's name and a guild they would like to join.
+         * 
+         * Uses a foreach loop to cycle through the player dictionary in order
+         * to find a matching player with the input provided. Next, a second foreach
+         * loop is used to find a proper guild. Once both are found, the player's 
+         * Guild ID is linked to the new Guild.
+         ****************************************************************************/
         public static void JoinGuild()
         {
             Console.Write("Enter the player name: ");
@@ -616,7 +702,6 @@ namespace Assignment1
 
             Console.Write("Enter the Guild they will join: ");
             string guildName = Console.ReadLine();
-
 
             foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
             {
@@ -637,3 +722,4 @@ namespace Assignment1
 
     }
 }
+ 
