@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -254,6 +256,42 @@ namespace GuildTest
                 set { gear[index] = value; }
             }
 
+            // Each player's gear
+            public void PrintGearList()
+            {
+                Console.Write("\n");
+                Console.WriteLine(this);
+
+                for (uint i = 0; i < GEAR_SLOTS; i++)
+                {
+                    // Print if item is in Player's gear
+                    if (ItemDictionary.ContainsKey(this[i]))
+                    {
+                        Console.WriteLine(ItemDictionary[this[i]]);
+                    }
+                    else
+                    {
+                        uint emptyGear = i;
+                        
+                        // Ensure that both ring and trinket slots print properly
+                        switch (emptyGear)
+                        {
+                            case 11:
+                                emptyGear--;
+                                break;
+                            case 12:
+                                emptyGear--;
+                                break;
+                            case 13:
+                                emptyGear = emptyGear - 2;
+                                break;
+                        }
+                        
+                        Console.WriteLine("(" + (ItemType)emptyGear + ") Empty\n");
+                    }
+                }
+            }
+
             // Default Constructor
             public Player()
             {
@@ -318,6 +356,8 @@ namespace GuildTest
             }
 
         }
+
+        // File paths
         public static string EquipmentFile = @"..\..\..\Program\equipment.txt";
         public static string GuildFile = @"..\..\..\Program\guilds.txt";
         public static string PlayerFile = @"..\..\..\Program\players.txt";
@@ -326,6 +366,7 @@ namespace GuildTest
         public static Dictionary<uint, Item> ItemDictionary = new Dictionary<uint, Item>();
         public static Dictionary<uint, Player> PlayerDictionary = new Dictionary<uint, Player>();
         public static Dictionary<uint, string> GuildDictionary = new Dictionary<uint, string>();
+
         public static int Main()
         {
             // Title
@@ -364,7 +405,17 @@ namespace GuildTest
                         ListItems();
                         break;
                     case "4":
-                        // Print Gear List For Player Method
+                        Console.Write("Enter the player name: ");
+                        string playerName = Console.ReadLine();
+
+                        foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+                        {
+                            if (pair.Value.Name.Equals(playerName))
+                            {
+                                PlayerDictionary[pair.Value.Id].PrintGearList();
+                            }
+                        }
+
                         break;
                     case "5":
                         LeaveGuild();
@@ -535,11 +586,11 @@ namespace GuildTest
         public static void LeaveGuild()
         {
             Console.Write("Enter the player name: ");
-            string playerName =  Console.ReadLine();
+            string playerName = Console.ReadLine();
 
             foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
             {
-                if (pair.Value.Name.Equals(playerName)) 
+                if (pair.Value.Name.Equals(playerName))
                 {
                     pair.Value.GuildID = 0;
                     Console.WriteLine("{0} has left thier Guild.", playerName);
@@ -563,7 +614,7 @@ namespace GuildTest
                 {
                     foreach (KeyValuePair<uint, string> pair2 in GuildDictionary)
                     {
-                        if(pair2.Value.Equals(guildName))
+                        if (pair2.Value.Equals(guildName))
                         {
                             pair.Value.GuildID = pair2.Key;
                             Console.WriteLine("{0} has joined {1}!", playerName, guildName);
@@ -573,5 +624,6 @@ namespace GuildTest
                 }
             }
         }
+
     }
 }
