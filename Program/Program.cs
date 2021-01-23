@@ -333,6 +333,30 @@ namespace Assignment1
                 }
             }
 
+            /**
+             * Computes the amount of experience given to a specific player
+             * 
+             * Uses a while loop to continuously level up a player and accumulate
+             * the new experience given.
+             * 
+             * @param newExp - The experience value entered in by the user
+             ****************************************************************************/
+            public void awardExp(uint newExp)
+            {
+                while (newExp > this.Level * 1000 && this.Level != MAX_LEVEL) 
+                {
+                    // Subtract current level from the amount of experience given
+                    newExp = newExp - this.Level * 1000;
+
+                    // Increase player level
+                    this.Level++;
+
+                    // Player levels up successfully
+                    Console.WriteLine("Ding!");
+                }
+            }
+
+
             // Default Constructor
             public Player()
             {
@@ -474,7 +498,7 @@ namespace Assignment1
                         // Unequip Gear Method
                         break;
                     case "9":
-                        // Award Experience Method
+                        AwardExperience();
                         break;
                     case "10":
                         // Quit
@@ -717,6 +741,44 @@ namespace Assignment1
                         }
                     }
                 }
+            }
+        }
+
+        /**
+         * The user enters a player's name and the amount of experience awarded.
+         * 
+         * Uses a foreach loop to cycle through the player dictionary in order
+         * to find a matching player with the input provided. Next, the player's
+         * id gets paired with the award experience functiion and the experience
+         * amount.
+         ****************************************************************************/
+        public static void AwardExperience()
+        {
+            Console.Write("Enter the player name: ");
+            string playerName = Console.ReadLine();
+
+            Console.Write("Enter the amount of experience to award: ");
+            string expAmount = Console.ReadLine();
+
+            try
+            {
+                foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+                {
+                    if (pair.Value.Name.Equals(playerName))
+                    {
+                        PlayerDictionary[pair.Value.Id].awardExp(Convert.ToUInt32(expAmount));
+                    }
+                }
+            }
+            // If user did not enter the experience correctly
+            catch (FormatException)
+            {
+                Console.WriteLine("");
+            }
+            // If experience doesn't fit into unsigned 32 bit integer
+            catch (OverflowException)
+            {
+                Console.WriteLine("");
             }
         }
 
