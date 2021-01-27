@@ -11,11 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assignment1
 {
@@ -28,6 +23,48 @@ namespace Assignment1
         public static uint MAX_ILLVL = 360;
         public static uint MAX_PRIMARY = 200;
         public static uint MAX_STAMINA = 275;
+        #endregion
+
+        #region Exceptions
+        public class ItemException : Exception // Deriving from the "Exception" base class
+        {
+            public override string ToString()
+            {
+                return "That item does not exist!";
+            }
+        }
+
+        public class LevelException : Exception // Deriving from the "Exception" base class
+        {
+            public override string ToString()
+            {
+                return "Item level is too high";
+            }
+        }
+
+        public class InventoryException : Exception // Deriving from the "Exception" base class
+        {
+            public override string ToString()
+            {
+                return "The inventory is full";
+            }
+        }
+
+        public class PlayerException : Exception // Deriving from the "Exception" base class
+        {
+            public override string ToString()
+            {
+                return "This player does not exist";
+            }
+        }
+
+        public class GuildException : Exception // Deriving from the "Exception" base class
+        {
+            public override string ToString()
+            {
+                return "This guild does not exist";
+            }
+        }
         #endregion
 
         // The Specific item types
@@ -168,16 +205,16 @@ namespace Assignment1
             }
 
             // Constructor
-            public Item(uint iId, string iName, ItemType iType, uint iIlvl, uint iPrimary, uint iStamina, uint iRequirement, string iFlavor)
+            public Item(uint newId, string newName, ItemType newType, uint newIlvl, uint newPrimary, uint newStamina, uint newRequirement, string newFlavor)
             {
-                Id = iId;
-                Name = iName;
-                Type = iType;
-                Ilvl = iIlvl;
-                Primary = iPrimary;
-                Stamina = iStamina;
-                Requirement = iRequirement;
-                Flavor = iFlavor;
+                Id = newId;
+                Name = newName;
+                Type = newType;
+                Ilvl = newIlvl;
+                Primary = newPrimary;
+                Stamina = newStamina;
+                Requirement = newRequirement;
+                Flavor = newFlavor;
             }
 
             // ToString Method
@@ -217,6 +254,9 @@ namespace Assignment1
             private uint guildID;
             private uint[] gear;
             private List<uint> inventory;
+
+            private bool ring;
+            private bool trinket;
 
             // Read Only Access
             public uint Id
@@ -282,6 +322,20 @@ namespace Assignment1
                 set { guildID = value; }
             }
 
+            // Private Read/Write Access
+            private bool Ring
+            {
+                get { return ring; }
+                set { ring = value; }
+            }
+
+            // Private Read/Write Access
+            private bool Trinket
+            {
+                get { return trinket; }
+                set { trinket = value; }
+            }
+
             // Indexer for gear
             public uint this[uint index]
             {
@@ -313,7 +367,7 @@ namespace Assignment1
                     else
                     {
                         uint emptyGear = i;
-                        
+
                         // Ensure that both ring and trinket slots print properly
                         switch (emptyGear)
                         {
@@ -327,10 +381,89 @@ namespace Assignment1
                                 emptyGear = emptyGear - 2;
                                 break;
                         }
-                        
-                        Console.WriteLine("(" + (ItemType)emptyGear + ") Empty\n");
+
+                        Console.WriteLine((ItemType)emptyGear + ": empty");
                     }
                 }
+            }
+
+            /**
+             * Unequip the user selected item 
+             * 
+             * Runs through checks that see if the item is part of the ring or trinket
+             * gear slot. If they are, unequip both rings or trinkets.
+             * 
+             * @param slotID - The ID of the gear slot on the player
+             ****************************************************************************/
+            public void UnequipGear(int slotID)
+            {
+                try
+                {
+                    // Unequip the slot they select
+                    if (slotID < 10)
+                    {
+                        //add the item to the inventory 
+                        this.AddInventory(this[Convert.ToUInt32(slotID)]);
+                        this[Convert.ToUInt32(slotID)] = 0;
+                        Console.WriteLine(this.Name + " has successfully unequipped the" + (ItemType)slotID + " slot!");
+                    }
+                    // If they choose ring, unequip both rings and inform user
+                    // Set boolean to true/lower slot
+                    else if (slotID < 11)
+                    {
+                        this.AddInventory(this.gear[10]);
+                        this.AddInventory(this.gear[11]);
+                        this.gear[10] = 0;
+                        this.gear[11] = 0;
+                        this.Ring = true;
+                        Console.WriteLine(this.Name + " has successfully unequipped " + (ItemType)slotID + "s!");
+                    }
+                    // If they choose trinket, unequip trinkets and inform user
+                    // Set boolean to true/lower slot
+                    else if (slotID < 12)
+                    {
+                        this.AddInventory(this.gear[12]);
+                        this.AddInventory(this.gear[13]);
+                        this.gear[12] = 0;
+                        this.gear[13] = 0;
+                        this.Trinket = true;
+                        Console.WriteLine(this.Name + " has successfully unequipped " + (ItemType)slotID + "s!");
+                    }
+                    else
+                    {
+                        Console.WriteLine(slotID + " is not an option");
+                    }
+                }
+                catch (InventoryException Error)
+                {
+                    Console.WriteLine(Error);
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Console.WriteLine(slotID + " is not an option");
+                }
+            }
+
+            /**
+             * Adds unequipped gear to the player's inventory
+             * 
+             * Runs through checks to make sure the item exists and
+             * the inventory isn't full
+             * 
+             * @param gearID - The unique ID for the gear about to be added
+             ****************************************************************************/
+            public void AddInventory(uint gearID)
+            {
+                if (!ItemDictionary.ContainsKey(gearID))
+                {
+                    throw new ItemException();
+                }
+                if (this.inventory.Count >= MAX_INVENTORY_SIZE)
+                {
+                    throw new InventoryException();
+                }
+
+                this.inventory.Add(gearID);
             }
 
             /**
@@ -343,7 +476,7 @@ namespace Assignment1
              ****************************************************************************/
             public void awardExp(uint newExp)
             {
-                while (newExp > this.Level * 1000 && this.Level != MAX_LEVEL) 
+                while (newExp > this.Level * 1000 && this.Level != MAX_LEVEL)
                 {
                     // Subtract current level from the amount of experience given
                     newExp = newExp - this.Level * 1000;
@@ -371,19 +504,37 @@ namespace Assignment1
             }
 
             // Constructor
-            public Player(uint iID, string iName, Race iPlayerRace, uint iLevel, uint iExp, uint iGuildID,
+            public Player(uint newID, string newName, Race newPlayerRace, uint newLevel, uint newExp, uint newGuildID,
                           uint helmet, uint neck, uint shoulders, uint back, uint chest, uint wrist, uint gloves,
                           uint belt, uint pants, uint boots, uint ring1, uint ring2, uint trinket1, uint trinket2)
             {
-                Id = iID;
-                Name = iName;
-                PlayerRace = iPlayerRace;
-                Level = iLevel;
-                Exp = iExp;
-                GuildID = iGuildID;
+                Id = newID;
+                Name = newName;
+                PlayerRace = newPlayerRace;
+                Level = newLevel;
+                Exp = newExp;
+                GuildID = newGuildID;
                 inventory = new List<uint>();
                 gear = new uint[GEAR_SLOTS];
                 gear = new uint[] { helmet, neck, shoulders, back, chest, wrist, gloves, belt, pants, boots, ring1, ring2, trinket1, trinket2 };
+
+                if (this[10] == 0 || (this[10] != 0 && this[11] != 0))
+                {
+                    Ring = true;
+                }
+                else if (this[10] != 0)
+                {
+                    Ring = false;
+                }
+
+                if (this[12] == 0 || (this[12] != 0 && this[13] != 0))
+                {
+                    Trinket = true;
+                }
+                else if (this[12] != 0)
+                {
+                    Trinket = false;
+                }
             }
 
             // ToString Method
@@ -423,9 +574,9 @@ namespace Assignment1
         }
 
         // File paths
-        public static string EquipmentFile = @"..\..\..\Program\equipment.txt";
-        public static string GuildFile = @"..\..\..\Program\guilds.txt";
-        public static string PlayerFile = @"..\..\..\Program\players.txt";
+        public static string EquipmentFile = @"..\..\..\equipment.txt";
+        public static string GuildFile = @"..\..\..\guilds.txt";
+        public static string PlayerFile = @"..\..\..\players.txt";
 
         // Dictionary declarations
         public static Dictionary<uint, Item> ItemDictionary = new Dictionary<uint, Item>();
@@ -436,11 +587,11 @@ namespace Assignment1
         {
             // Title
             Console.WriteLine("Welcome to the World of ConflictCraft: Testing Environment!\n");
-            
+
             // Call functions to read each file
-            ReadItems(EquipmentFile);
             ReadPlayers(PlayerFile);
             ReadGuilds(GuildFile);
+            ReadItems(EquipmentFile);
 
             string s = "";
 
@@ -473,15 +624,28 @@ namespace Assignment1
                         ListItems();
                         break;
                     case "4":
-                        Console.Write("Enter the player name: ");
-                        string playerName = Console.ReadLine();
 
-                        foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+                        try
                         {
-                            if (pair.Value.Name.Equals(playerName))
+                            bool playerFound = false;
+                            Console.Write("Enter the player name: ");
+                            string playerName = Console.ReadLine();
+
+
+                            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
                             {
-                                PlayerDictionary[pair.Value.Id].PrintGearList();
+                                if (pair.Value.Name.Equals(playerName))
+                                {
+                                    playerFound = true;
+                                    PlayerDictionary[pair.Value.Id].PrintGearList();
+                                }
                             }
+
+                            if (!playerFound) throw new PlayerException();
+                        }
+                        catch (PlayerException Error)
+                        {
+                            Console.WriteLine(Error);
                         }
 
                         break;
@@ -492,16 +656,27 @@ namespace Assignment1
                         JoinGuild();
                         break;
                     case "7":
-                        // Equip Gear Method
+
+                        // Equip Gear
+
                         break;
                     case "8":
-                        // Unequip Gear Method
+                        UnequipGear();
                         break;
                     case "9":
                         AwardExperience();
                         break;
+                    case "T":
+                        HiddenOption();
+                        break;
                     case "10":
-                        // Quit
+                    case "q":
+                    case "Q":
+                    case "quit":
+                    case "Quit":
+                    case "exit":
+                    case "Exit":
+                        s = "10";
                         break;
                     default:
                         Console.WriteLine(s + " is not an option.");
@@ -510,65 +685,6 @@ namespace Assignment1
             } while (s != "10");
 
             return 0;
-        }
-
-        /**
-         * Reads the equipment file and stores them into a dictionary.
-         * 
-         * Converts each input separated by tabs into a new Item and adds them to 
-         * a previously defined item dictionary.
-         * 
-         * @param input - The name of the input file to be read.
-         ****************************************************************************/
-        public static void ReadItems(string input)
-        {
-            // String to read lines
-            string inputLine;
-
-            // Try block to catch filenotfound
-            try
-            {
-                using (StreamReader inFile = new StreamReader(input))
-                {
-                    inputLine = inFile.ReadLine();
-
-                    while (inputLine != null)
-                    {
-                        // Separate with tab 
-                        string[] inItems = inputLine.Split('\t');
-                        // If the correct number of attributes are on the line, create an item from line
-                        if (inItems.Length == 8)
-                        {
-                            // Create the item from the array, convert string to uints and ItemTypes when necessary
-                            Item inputItem = new Item(Convert.ToUInt32(inItems[0]), inItems[1], (ItemType)Convert.ToUInt32(inItems[2]), Convert.ToUInt32(inItems[3]), Convert.ToUInt32(inItems[4]),
-                                                     Convert.ToUInt32(inItems[5]), Convert.ToUInt32(inItems[6]), inItems[7]);
-                            // Add to dictionary of items
-                            ItemDictionary.Add(inputItem.Id, inputItem);
-                        }
-
-                        // Read next line
-                        inputLine = inFile.ReadLine();
-                    } // end of while
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                Console.WriteLine(input + "file does not exist");
-            }
-        }
-
-        /**
-         * Lists all items in the item dictionary.
-         * 
-         * Uses a foreach loop to cycle through the items and prints each 
-         * of their values.
-         ****************************************************************************/
-        public static void ListItems()
-        {
-            foreach (KeyValuePair<uint, Item> pair in ItemDictionary)
-            {
-                Console.WriteLine("{0}", pair.Value);
-            }
         }
 
         /**
@@ -610,26 +726,12 @@ namespace Assignment1
 
                         // Read next line
                         inputLine = inFile.ReadLine();
-                    } // end of while
+                    }
                 }
             }
             catch (FileNotFoundException)
             {
                 Console.WriteLine(input + " file does not exist");
-            }
-        }
-
-        /**
-         * Lists all players in the player dictionary.
-         * 
-         * Uses a foreach loop to cycle through the players and prints each 
-         * of their values.
-         ****************************************************************************/
-        public static void ListPlayers()
-        {
-            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
-            {
-                Console.WriteLine("{0}", pair.Value);
             }
         }
 
@@ -666,12 +768,71 @@ namespace Assignment1
 
                         // Read next line
                         inputLine = inFile.ReadLine();
-                    } // end of while
+                    }
                 }
             }
             catch (FileNotFoundException)
             {
                 Console.WriteLine(input + "file does not exist");
+            }
+        }
+
+        /**
+         * Reads the equipment file and stores them into a dictionary.
+         * 
+         * Converts each input separated by tabs into a new Item and adds them to 
+         * a previously defined item dictionary.
+         * 
+         * @param input - The name of the input file to be read.
+         ****************************************************************************/
+        public static void ReadItems(string input)
+        {
+            // String to read lines
+            string inputLine;
+
+            // Try block to catch filenotfound
+            try
+            {
+                using (StreamReader inFile = new StreamReader(input))
+                {
+                    inputLine = inFile.ReadLine();
+
+                    while (inputLine != null)
+                    {
+                        // Separate with tab 
+                        string[] inItems = inputLine.Split('\t');
+                        // If the correct number of attributes are on the line, create an item from line
+                        if (inItems.Length == 8)
+                        {
+                            // Create the item from the array, convert string to uints and ItemTypes when necessary
+                            Item inputItem = new Item(Convert.ToUInt32(inItems[0]), inItems[1], (ItemType)Convert.ToUInt32(inItems[2]), Convert.ToUInt32(inItems[3]), Convert.ToUInt32(inItems[4]),
+                                                     Convert.ToUInt32(inItems[5]), Convert.ToUInt32(inItems[6]), inItems[7]);
+                            // Add to dictionary of items
+                            ItemDictionary.Add(inputItem.Id, inputItem);
+                        }
+
+                        // Read next line
+                        inputLine = inFile.ReadLine();
+                    }
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine(input + "file does not exist");
+            }
+        }
+
+        /**
+         * Lists all players in the player dictionary.
+         * 
+         * Uses a foreach loop to cycle through the players and prints each 
+         * of their values.
+         ****************************************************************************/
+        public static void ListPlayers()
+        {
+            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+            {
+                Console.WriteLine("{0}", pair.Value);
             }
         }
 
@@ -690,6 +851,20 @@ namespace Assignment1
         }
 
         /**
+         * Lists all items in the item dictionary.
+         * 
+         * Uses a foreach loop to cycle through the items and prints each 
+         * of their values.
+         ****************************************************************************/
+        public static void ListItems()
+        {
+            foreach (KeyValuePair<uint, Item> pair in ItemDictionary)
+            {
+                Console.WriteLine("{0}", pair.Value);
+            }
+        }
+
+        /**
          * The user enters a player's name and the player leaves their guild
          * 
          * Uses a foreach loop to cycle through the player dictionary in order
@@ -697,17 +872,28 @@ namespace Assignment1
          ****************************************************************************/
         public static void LeaveGuild()
         {
-            Console.Write("Enter the player name: ");
-            string playerName = Console.ReadLine();
-
-            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+            try
             {
-                if (pair.Value.Name.Equals(playerName))
+                Console.Write("Enter the player name: ");
+                string playerName = Console.ReadLine();
+                bool playerFound = false;
+
+                foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
                 {
-                    pair.Value.GuildID = 0;
-                    Console.WriteLine("{0} has left thier Guild.", playerName);
-                    break;
+                    if (pair.Value.Name.Equals(playerName))
+                    {
+                        playerFound = true;
+                        pair.Value.GuildID = 0;
+                        Console.WriteLine("{0} has left thier Guild.", playerName);
+                        break;
+                    }
                 }
+
+                if (!playerFound) throw new PlayerException();
+            }
+            catch (PlayerException Error)
+            {
+                Console.WriteLine(Error);
             }
         }
 
@@ -721,26 +907,104 @@ namespace Assignment1
          ****************************************************************************/
         public static void JoinGuild()
         {
-            Console.Write("Enter the player name: ");
-            string playerName = Console.ReadLine();
-
-            Console.Write("Enter the Guild they will join: ");
-            string guildName = Console.ReadLine();
-
-            foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+            try
             {
-                if (pair.Value.Name.Equals(playerName))
+                Console.Write("Enter the player name: ");
+                string playerName = Console.ReadLine();
+                bool playerFound = false;
+                bool guildFound = false;
+
+                foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
                 {
-                    foreach (KeyValuePair<uint, string> pair2 in GuildDictionary)
+                    if (pair.Value.Name.Equals(playerName))
                     {
-                        if (pair2.Value.Equals(guildName))
+                        playerFound = true;
+
+                        Console.Write("Enter the Guild they will join: ");
+                        string guildName = Console.ReadLine();
+
+                        foreach (KeyValuePair<uint, string> pair2 in GuildDictionary)
                         {
-                            pair.Value.GuildID = pair2.Key;
-                            Console.WriteLine("{0} has joined {1}!", playerName, guildName);
-                            break;
+                            if (pair2.Value.Equals(guildName))
+                            {
+                                guildFound = true;
+                                pair.Value.GuildID = pair2.Key;
+                                Console.WriteLine("{0} has joined {1}!", playerName, guildName);
+                                break;
+                            }
                         }
                     }
                 }
+
+                if (!playerFound) throw new PlayerException();
+                if (!guildFound) throw new GuildException();
+            }
+            catch (PlayerException Error)
+            {
+                Console.WriteLine(Error);
+            }
+            catch (GuildException Error)
+            {
+                Console.WriteLine(Error);
+            }
+        }
+
+        /**
+         * The user enters a player's name and the gear slot they will unequip
+         * 
+         * Uses an enumerator to list all the gear in order. The user can choose
+         * which gear slot to unequip and the function matches it with the proper
+         * player.
+         ****************************************************************************/
+        public static void UnequipGear()
+        {
+            try
+            {
+                bool playerFound = false;
+
+                Console.Write("Enter the player name: ");
+                string unequipPlayerName = Console.ReadLine();
+
+                foreach (KeyValuePair<uint, Player> pair in PlayerDictionary)
+                {
+                    if (pair.Value.Name.Equals(unequipPlayerName))
+                    {
+                        playerFound = true;
+                        // Ask for name of item
+                        Console.WriteLine("Enter the item slot they will unequip: ");
+                        // Show all items
+                        for (int i = 0; i < Enum.GetNames(typeof(ItemType)).Length; i++)
+                        {
+                            Console.WriteLine("\t{0} = {1}", i, (ItemType)i);
+                        }
+
+                        string unequipItem = Console.ReadLine();
+
+                        PlayerDictionary[pair.Value.Id].UnequipGear(Convert.ToInt32(unequipItem));
+                    }
+                }
+
+                if (!playerFound) throw new PlayerException();
+            }
+            // If the player doesn't exist
+            catch (PlayerException Error)
+            {
+                Console.WriteLine(Error);
+            }
+            // If the item doesn't exist or is not equipped
+            catch (ItemException Error)
+            {
+                Console.WriteLine(Error);
+            }
+            // If they did not enter a number correctly
+            catch (FormatException)
+            {
+                Console.WriteLine("Not a valid number");
+            }
+            // If the number doesn't fit into unsigned 32 bit integer
+            catch (OverflowException)
+            {
+                Console.WriteLine("Number too large or too small");
             }
         }
 
@@ -756,9 +1020,7 @@ namespace Assignment1
         {
             Console.Write("Enter the player name: ");
             string playerName = Console.ReadLine();
-
-            Console.Write("Enter the amount of experience to award: ");
-            string expAmount = Console.ReadLine();
+            bool playerFound = false;
 
             try
             {
@@ -766,22 +1028,71 @@ namespace Assignment1
                 {
                     if (pair.Value.Name.Equals(playerName))
                     {
+                        playerFound = true;
+
+                        Console.Write("Enter the amount of experience to award: ");
+                        string expAmount = Console.ReadLine();
                         PlayerDictionary[pair.Value.Id].awardExp(Convert.ToUInt32(expAmount));
                     }
                 }
+
+                if (!playerFound) throw new PlayerException();
+            }
+            // If player does not exist
+            catch (PlayerException Error)
+            {
+                Console.WriteLine(Error);
             }
             // If user did not enter the experience correctly
             catch (FormatException)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Not a valid number");
             }
             // If experience doesn't fit into unsigned 32 bit integer
             catch (OverflowException)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Number too large or too small");
+            }
+        }
+
+        /**
+         * A hidden option used to set the items and players in order
+         * 
+         * Uses a sorted set to display the player and item dictionaries in
+         * an appropriate order.
+         ****************************************************************************/
+        public static void HiddenOption()
+        {
+            // Create sorted set of players
+            SortedSet<Player> playerSet = new SortedSet<Player>();
+            // Create sorted set of items
+            SortedSet<Item> itemSet = new SortedSet<Item>();
+
+
+            // Fill set with players
+            foreach (Player p in PlayerDictionary.Values)
+            {
+                playerSet.Add(p);
+            }
+            //fill set with items
+            foreach (Item i in ItemDictionary.Values)
+            {
+                itemSet.Add(i);
+            }
+
+            Console.WriteLine("Sorted Players\n");
+            //Output the sorted set of players
+            foreach (Player p in playerSet)
+            {
+                Console.WriteLine(p);
+            }
+            Console.WriteLine("\nSorted Items\n");
+            //Output the sorted set of items
+            foreach (Item i in itemSet)
+            {
+                Console.WriteLine(i);
             }
         }
 
     }
 }
- 
