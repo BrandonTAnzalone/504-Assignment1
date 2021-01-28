@@ -11,6 +11,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Assignment1
 {
@@ -388,6 +391,65 @@ namespace Assignment1
             }
 
             /**
+             * Equip the user's chosen gear
+             * 
+             * Checks if player's level is high enough to equip the gear. If the 
+             * player's level is high enough, convert the user input into the proper
+             * item type. Check if ring and trinket slots are already filled.
+             * 
+             * @param gearID - The ID of the gear to be equipped
+             ****************************************************************************/
+            public void EquipGear(uint gearID)
+            {
+                try
+                {
+                    if (this.Level < ItemDictionary[gearID].Requirement)
+                    {
+                        throw new LevelException();
+                    }
+                }
+                catch (LevelException)
+                {
+                    Console.WriteLine("Item level is too high");
+                    return;
+                }
+
+                if (Convert.ToUInt32(ItemDictionary[gearID].Type) <= 9)
+                {
+                    this[Convert.ToUInt32(ItemDictionary[gearID].Type)] = gearID;
+                }
+                else if (Convert.ToUInt32(ItemDictionary[gearID].Type) > 9)
+                {
+
+                    if (this.Ring == true)
+                    {
+                        this[10] = gearID;
+                        this.Ring = false;
+                    }
+                    else
+                    {
+                        this[11] = gearID;
+                        this.Ring = true;
+                    }
+                }
+                else
+                {
+                    if (this.Trinket == true)
+                    {
+                        this[12] = gearID;
+                        this.Trinket = false;
+                    }
+                    else
+                    {
+                        this[13] = gearID;
+                        this.Trinket = true;
+                    }
+                }
+
+                Console.WriteLine(this.Name + " has successfully equippied " + ItemDictionary[gearID].Name + "!");
+            }
+
+            /**
              * Unequip the user selected item 
              * 
              * Runs through checks that see if the item is part of the ring or trinket
@@ -405,7 +467,7 @@ namespace Assignment1
                         //add the item to the inventory 
                         this.AddInventory(this[Convert.ToUInt32(slotID)]);
                         this[Convert.ToUInt32(slotID)] = 0;
-                        Console.WriteLine(this.Name + " has successfully unequipped the" + (ItemType)slotID + " slot!");
+                        Console.WriteLine(this.Name + " has successfully unequipped the " + (ItemType)slotID + " slot!");
                     }
                     // If they choose ring, unequip both rings and inform user
                     // Set boolean to true/lower slot
@@ -574,9 +636,9 @@ namespace Assignment1
         }
 
         // File paths
-        public static string EquipmentFile = @"..\..\..\equipment.txt";
-        public static string GuildFile = @"..\..\..\guilds.txt";
-        public static string PlayerFile = @"..\..\..\players.txt";
+        public static string EquipmentFile = @"..\..\..\Program\equipment.txt";
+        public static string GuildFile = @"..\..\..\Program\guilds.txt";
+        public static string PlayerFile = @"..\..\..\Program\players.txt";
 
         // Dictionary declarations
         public static Dictionary<uint, Item> ItemDictionary = new Dictionary<uint, Item>();
@@ -656,9 +718,45 @@ namespace Assignment1
                         JoinGuild();
                         break;
                     case "7":
+                        try
+                        {
+                            Console.Write("Enter the player name: ");
+                            string equipPlayerName = Console.ReadLine();
+                            bool playerFound = false;
+                            bool itemFound = false;
 
-                        // Equip Gear
+                            foreach (KeyValuePair<uint, Player> playerPair in PlayerDictionary)
+                            {
+                                if (playerPair.Value.Name.Equals(equipPlayerName))
+                                {
+                                    playerFound = true;
 
+                                    Console.Write("Enter the item name they will equip: ");
+                                    string itemName = Console.ReadLine();
+
+                                    foreach (KeyValuePair<uint, Item> itemPair in ItemDictionary)
+                                    {
+                                        if (itemPair.Value.Name.Equals(itemName))
+                                        {
+                                            itemFound = true;
+                                            PlayerDictionary[playerPair.Value.Id].EquipGear(itemPair.Value.Id);
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            if (!playerFound) throw new PlayerException();
+                            if (!itemFound) throw new ItemException();
+                        }
+                        catch (PlayerException Error)
+                        {
+                            Console.WriteLine(Error);
+                        }
+                        catch (ItemException Error)
+                        {
+                            Console.WriteLine(Error);
+                        }
                         break;
                     case "8":
                         UnequipGear();
