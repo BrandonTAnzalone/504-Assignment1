@@ -1,7 +1,7 @@
 ﻿//***************************************************************************
 //
 //  Troy DeClerck       - Z1877438
-//  Brandon Anzalone    - Z-------
+//  Brandon Anzalone    - Z1884778
 //  CSCI 473/504
 //
 //  We certify that this is our own work and where appropriate an extension
@@ -11,9 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assignment1
 {
