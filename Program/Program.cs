@@ -96,7 +96,7 @@ namespace Assignment1
                 get { return id; }
                 private set { id = value; }
             }
-
+            //testing
             // Read/Write Access
             public string Name
             {
@@ -119,7 +119,7 @@ namespace Assignment1
                     }
                 }
             }
-
+            //test
             // Read/Write Access
             // Must be between 0 and max level
             public uint Ilvl
